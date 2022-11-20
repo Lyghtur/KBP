@@ -1,0 +1,9 @@
+[flake8]
+; E501	Line too long (82 > 79 characters)
+extend-ignore = E501
+exclude =
+    .git,
+    __pycache__,
+    dev,
+    .mypy_cache,
+    .pytest_cache

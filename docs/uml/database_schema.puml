@@ -1,0 +1,27 @@
+@startuml
+
+entity Users {
+    *id: uuid <<generated>>
+    --
+}
+
+entity Tasks {
+    *id: uuid <<generated>>
+    --
+    name: Text
+    --
+    * user_id: uuid <<FK>>
+}
+
+entity Files {
+    *if: uuid <<generated>>
+    __
+    * path: varcahr(256)
+    __
+    * task_id: uuid <<FK>>
+}
+
+Users ||--|{ Tasks
+Tasks ||--o{ Files
+
+@enduml

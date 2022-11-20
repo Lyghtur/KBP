@@ -1,0 +1,62 @@
+version: "3.9"
+
+volumes:
+  minio_data:
+  postgres_data:
+  dev:
+
+services:
+  app:
+    build: .
+    volumes:
+      - ".:/app"
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=kbpdb
+      - POSTGRES_USER=kbpusr
+      - POSTGRES_PASSWORD=kbppwd
+      - FS_HOST=minio
+      - FS_PORT=9000
+      - FS_ACCESS_KEY=minio-root-user
+      - FS_SECRET_KEY=minio-root-password
+      - FS_BUCKET_MENTORS=mentor-files
+    entrypoint:
+      - "uvicorn"
+      - "kbp.app:app"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8000"
+      - "--reload"
+    depends_on:
+      - minio
+      - postgres
+  minio:
+    image: "bitnami/minio:2022.10.29-debian-11-r3"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minio-root-user
+      - MINIO_ROOT_PASSWORD=minio-root-password
+      - MINIO_DEFAULT_BUCKETS=mentor-files
+    restart: always
+    volumes:
+      - minio_data:/data
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - PGDATA=data/postgres
+      - DATABASE_HOST=127.0.0.1
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=root
+    volumes:
+      - postgres_data:/data/postgres
+      - ./dev/init-user-db.sql:/docker-entrypoint-initdb.d/init-user-db.sql
+    ports:
+      - "5432:5432"
+    restart: always
